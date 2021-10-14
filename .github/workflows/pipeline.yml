@@ -36,7 +36,7 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v2
 
-    - name: Setup JDK 11
+    - name: Setup JDK
       uses: actions/setup-java@v1
       with:
         java-version: 11
@@ -53,12 +53,12 @@ jobs:
         project_id: ${{ secrets.GKE_PROJECT }}
 
     # Configure the Docker image using Google CLI, we set-up CLI first so that we can just run commands like in a simple command line.
-    - name: Configure Docker
+    - name: Configure Docker Image
       run: |-
         gcloud --quiet auth configure-docker
 
     # Get the GKE credentials so we can deploy to the cluster
-    - name: Get the GKE Credentials
+    - name: Get the GKE Credentials for Deployment
       uses: google-github-actions/get-gke-credentials@v0.2.1
       with:
         cluster_name: ${{ env.GKE_CLUSTER }}
@@ -70,12 +70,10 @@ jobs:
       run: |-
         docker build \
           --tag "gcr.io/$PROJECT_ID/$IMAGE:$TAG" \
-          --build-arg GITHUB_SHA="$GITHUB_SHA" \
-          --build-arg GITHUB_REF="$GITHUB_REF" \
           .
 
     # Publish the created image to GCR
-    - name: Publish the created Docker Image
+    - name: Publish created Docker Image
       run: |-
         docker push "gcr.io/$PROJECT_ID/$IMAGE:$TAG"
 
@@ -86,7 +84,7 @@ jobs:
         chmod u+x ./kustomize
 
     # Deploy the Docker image to the GKE cluster
-    - name: Deploy
+    - name: Deploying Container
       run: |-
         ./kustomize edit set image gcr.io/PROJECT_ID/IMAGE:TAG=gcr.io/$PROJECT_ID/$IMAGE:$TAG
         ./kustomize build . | kubectl apply -f -
