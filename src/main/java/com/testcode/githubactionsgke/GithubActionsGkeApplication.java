@@ -1,4 +1,4 @@
-package com.keithtestcode.githubactionsgke;
+package com.testcode.githubactionsgke;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

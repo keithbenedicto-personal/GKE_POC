@@ -8,7 +8,7 @@
 		<version>2.5.5</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.keith-test-code</groupId>
+	<groupId>com.testcode</groupId>
 	<artifactId>github-actions-gke</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>github-actions-gke</name>

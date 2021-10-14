@@ -1,4 +1,4 @@
-package com.keithtestcode.githubactionsgke;
+package com.testcode.githubactionsgke;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,6 +10,6 @@ public class HelloWorldController {
     @RequestMapping("/")
     @ResponseBody
     public String helloWorld() {
-        return "Hello World, This is GKE!";
+        return "Test Deployment using GKE + Github Actions as CICD Pipeline";
     }
 }
