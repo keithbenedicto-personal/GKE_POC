@@ -21,7 +21,7 @@ env: #Variables
   PROJECT_ID: ${{ secrets.GKE_PROJECT }} # Accesses the secret you created from GKE, this is the ProjectID in your GCP Project
   GKE_CLUSTER: github-actions-gke    # Name of your Cluster
   GKE_ZONE: us-central1   # TODO: update to cluster zone
-  DEPLOYMENT_NAME: gke-test-github-actions # Any name you want to use to deploy
+  DEPLOYMENT_NAME: github-actions-gke # Any name you want to use to deploy, deployment_name should be the same name used in metadata in deployment.yml
   IMAGE: github-actions-gke-image #Any name you want to use when the docker image is created
   TAG: 1.0.0 # Any tag you want, you can use this for versioning
 
