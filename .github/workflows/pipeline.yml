@@ -77,7 +77,7 @@ jobs:
     # Publish the created image to GCR
     - name: Publish the created Docker Image
       run: |-
-        docker push "gcr.io/$PROJECT_ID/$IMAGE:$GITHUB_SHA"
+        docker push "gcr.io/$PROJECT_ID/$IMAGE:$TAG"
 
     # Set up kustomize, kustomize is counterpart of helm in GCP
     - name: Set up Kustomize
