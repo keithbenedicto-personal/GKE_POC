@@ -17,12 +17,13 @@ on:
     branches:
       - main
 
-env:
-  PROJECT_ID: ${{ secrets.GKE_PROJECT }}
-  GKE_CLUSTER: cluster-1    # TODO: update to cluster name
+env: #Variables
+  PROJECT_ID: ${{ secrets.GKE_PROJECT }} # Accesses the secret you created from GKE, this is the ProjectID in your GCP Project
+  GKE_CLUSTER: github-actions-gke    # Name of your Cluster
   GKE_ZONE: us-central1-c   # TODO: update to cluster zone
-  DEPLOYMENT_NAME: gke-test # TODO: update to deployment name
-  IMAGE: static-site
+  DEPLOYMENT_NAME: gke-test-github-actions # Any name you want to use to deploy
+  IMAGE: github-actions-gke-image #Any name you want to use when the docker image is created
+  TAG: 1.0.0 # Any tag you want, you can use this for versioning
 
 jobs:
   setup-build-publish-deploy:
@@ -31,42 +32,54 @@ jobs:
     environment: production
 
     steps:
-    - name: Checkout
+      
+    - name: Checkout Repository
       uses: actions/checkout@v2
 
-    # Setup gcloud CLI
-    - uses: google-github-actions/setup-gcloud@v0.2.0
+    - name: Setup JDK 11
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+        server-id: github
+        settings-path: ${{ github.workpsace }}
+
+    - name: Build Springboot with Maven
+      run: mvn clean package -DskipTests
+
+    - name: Setup Google CLI
+      uses: google-github-actions/setup-gcloud@v0.2.0
       with:
         service_account_key: ${{ secrets.GKE_SA_KEY }}
         project_id: ${{ secrets.GKE_PROJECT }}
 
-    # Configure Docker to use the gcloud command-line tool as a credential
-    # helper for authentication
-    - run: |-
+    # Configure the Docker image using Google CLI, we set-up CLI first so that we can just run commands like in a simple command line.
+    - name: Configure Docker
+      run: |-
         gcloud --quiet auth configure-docker
 
     # Get the GKE credentials so we can deploy to the cluster
-    - uses: google-github-actions/get-gke-credentials@v0.2.1
+    - name: Get the GKE Credentials
+      uses: google-github-actions/get-gke-credentials@v0.2.1
       with:
         cluster_name: ${{ env.GKE_CLUSTER }}
         location: ${{ env.GKE_ZONE }}
         credentials: ${{ secrets.GKE_SA_KEY }}
 
     # Build the Docker image
-    - name: Build
+    - name: Building Docker Image
       run: |-
         docker build \
-          --tag "gcr.io/$PROJECT_ID/$IMAGE:$GITHUB_SHA" \
+          --tag "gcr.io/$PROJECT_ID/$IMAGE:$TAG" \
           --build-arg GITHUB_SHA="$GITHUB_SHA" \
           --build-arg GITHUB_REF="$GITHUB_REF" \
           .
 
-    # Push the Docker image to Google Container Registry
-    - name: Publish
+    # Publish the created image to GCR
+    - name: Publish the created Docker Image
       run: |-
         docker push "gcr.io/$PROJECT_ID/$IMAGE:$GITHUB_SHA"
 
-    # Set up kustomize
+    # Set up kustomize, kustomize is counterpart of helm in GCP
     - name: Set up Kustomize
       run: |-
         curl -sfLo kustomize https://github.com/kubernetes-sigs/kustomize/releases/download/v3.1.0/kustomize_3.1.0_linux_amd64
